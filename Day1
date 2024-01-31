@@ -27,7 +27,7 @@ endmodule
 
 module full adder(a,b,ci,sum,cout);
 input a,b,ci;
-output sum,co;
+output sum,cout;
 assign sum=a^b^ci;
 assign cout=(a&b)|(b&ci)|(ci&a);
 endmodule 
