@@ -1,1 +1,97 @@
+//Half subtractor
+module half_subtractor(input a,
+                  input b,
+				  output diff,
+				  output bin);
+				  
+	assign diff = a^b;
+	assign bin = (~a)&b;
+	
+endmodule
+// Test bench for Half Subtractor
+module tb_halfsubtractor();
+
+reg a;
+reg b;
+
+wire diff,bin;
+half_subtractor DUT(a,b,diff,bin);
+
+task stimulus(input d1,d2);
+ begin
+   a=d1;
+   b=d2;
+  end
+ endtask
+ 
+initial 
+  begin
+    $monitor("A=%b B=%b : Difference=%b BorrowIn=%b",a,b,diff,bin);
+	end
+	
+initial 
+  begin
+   
+       stimulus(0,0);
+   #10 stimulus(0,1);
+   #10 stimulus(1,0);
+   #10 stimulus(1,1);
+  
+  #20 $finish;
+  end
+  
+endmodule
+
+//Full subtractor
+module full_subtractor(input a,
+                  input b,
+				  input bout,
+				  output diff,
+				  output bin);
+				  
+	
+	assign diff =a^b^bout;
+	assign bin= ((~a)&b)|(bout&(a~^b));
+	
+endmodule
+
+// Test bench for Full subtractor
+module tb_fullsubtractor();
+
+reg a;
+reg b;
+reg bout;
+
+wire diff,bin;
+FS_using_HS DUT(a,b,bout,diff,bin);
+
+task stimulus(input d1,d2,b1);
+ begin
+   a=d1;
+   b=d2;
+   bout=b1;
+  end
+ endtask
+ 
+initial 
+  begin
+     $monitor("A=%b B=%b BorrowOut=%b: Difference=%b BorrowIn=%b",a,b,bout,diff,bin);
+	end
+	
+initial 
+  begin
+   
+       stimulus(0,0,0);
+   #10 stimulus(0,0,1);
+   #10 stimulus(0,1,0);
+   #10 stimulus(0,1,1);
+   #10 stimulus(1,0,0);
+   #10 stimulus(1,0,1);
+   #10 stimulus(1,1,0);
+   #10 stimulus(1,1,1);
+  
+  #20 $finish;
+  end
+  
+endmodule
 
