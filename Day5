@@ -1,0 +1,39 @@
+//binary to gray decoder
+module btg(input [3:0]b,
+           output [3:0]g);
+		   
+	assign g[3]=b[3];
+	assign g[2]=b[3]^b[2];
+	assign g[1]=b[2]^b[1];
+	assign g[0]=b[0]^b[1];
+	
+endmodule
+//testbench code for btg:	
+module btg_tb;
+
+reg [3:0]b;
+wire [3:0]g;
+
+
+
+btg DUT(b,g);
+
+initial
+ begin
+  $dumpfile("btg.vcd");
+  $dumpvars(0,btg_tb);
+end
+ 
+initial 
+
+    begin
+	     #1 b=0;
+	    #1 $monitor($time,"  %b : %b",b,g);
+        repeat(6)
+		begin
+		 #4 b=$random;         
+		 end		
+		#10 $finish;
+    end
+	
+endmodule
