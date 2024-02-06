@@ -31,3 +31,81 @@ initial
   #10 $finish;
  end
 endmodule
+
+//4bit subtractor using half subtractor
+// substractor_4bit 
+
+module substractor_4bit(a,b,Bout,diff,Bin);
+
+   input [3:0]a,b;
+   input Bout;
+   output [3:0]diff;
+   output Bin;
+   wire [2:0]t;
+ 
+  rps sub1(a[0],b[0],Bout,diff[0],t[0]);
+  rps sub2(a[1],b[1],t[0],diff[1],t[1]);
+  rps sub3(a[2],b[2],t[1],diff[2],t[2]);
+  rps sub4(a[3],b[3],t[2],diff[3],Bin);
+
+endmodule
+// ripple carry subractor 
+
+module rps(input a,b,Bout ,output diff,Bin);
+ 
+  FS_using_HS diff1(a,b,Bout,diff,Bin);
+
+endmodule//Structural representaion of Half_substract
+
+module halfsubstract_struct(input a,b,output diff,borr);
+wire t0;
+ xor G1(diff,a,b);
+ not G2(t0,a);
+ and G3(borr,t0,b);
+ 
+endmodule
+// full adder using half adder 
+
+module FS_using_HS(input a,b,Bout ,output diff,Bin);
+  wire [2:0]t;
+
+  halfsubstract_struct Hs1(a,b,t[0],t[1]);
+  halfsubstract_struct Hs2(t[0],Bout,diff,t[2]);
+  
+  or G1(Bin,t[1],t[2]);
+  
+endmodule
+//functional behaviour of full Subtractor
+
+module FS_4bit_tb;
+
+reg [3:0]a,b;
+reg Bout;
+wire [3:0]diff;
+wire Bin;
+
+substractor_4bit DUT(a,b,Bout,diff,Bin);
+
+initial
+  begin 
+    $dumpfile("substractor_4bit.vcd");
+    $dumpvars(0,FS_4bit_tb);
+  end;
+
+
+initial
+ begin
+    #5 a=4'h0;b=4'h0;Bout=1'b0;
+    #1 $display("%b %b %b :%b %b ",a,b,Bout,diff,Bin);  
+    repeat(5)
+   begin
+    #5 a=$random;b=$random;Bout=1'b0;
+    #1 $display("%b %b %b :%b %b ",a,b,Bout,diff,Bin);
+
+   end
+   #5 a=4'hf;b=4'hf;Bout=1'b0;
+   #1 $display("%b %b %b :%b %b ",a,b,Bout,diff,Bin);
+  #10 $finish;
+ end
+endmodule
+
