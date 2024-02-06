@@ -1,1 +1,74 @@
+module halfadder_struct(input a,b,output sum,carry);
+ xor G1(sum,a,b);
+ and G2(carry,a,b);
+ 
+endmodule
+
+module FA_using_HA(input a,b,cin ,output sum,cout);
+  wire [2:0]t;
+
+  halfadder_struct HA1(a,b,t[0],t[1]);
+  halfadder_struct HA2(t[0],cin,sum,t[2]);
+  
+  or G1(cout,t[1],t[2]);
+  
+endmodule
+// full adder using half adder 
+
+module rpa(input a,b,cin ,output sum,cout);
+ 
+  FA_using_HA add1(a,b,cin,sum,cout);
+
+endmodule
+
+module adder_4bit(a,b,cin,sum,cout);
+
+   input [3:0]a,b;
+   input cin;
+   output [3:0]sum;
+   output cout;
+   wire [2:0]t;
+ 
+ 
+  rpa adder1(a[0],b[0],cin,sum[0],t[0]);
+  rpa adder2(a[1],b[1],t[0],sum[1],t[1]);
+  rpa adder3(a[2],b[2],t[1],sum[2],t[2]);
+  rpa adder4(a[3],b[3],t[2],sum[3],cout);
+
+endmodule
+//testbench code for 4bit adder:
+//functional behaviour of full Subtractor
+
+module FA_4bit_tb;
+
+reg [3:0]a,b;
+reg cin;
+wire [3:0]sum;
+wire cout;
+
+adder_4bit DUT1(a,b,cin,sum,cout);
+
+initial
+  begin 
+    $dumpfile("adder_4bit.vcd");
+    $dumpvars(0,FA_4bit_tb);
+  end;
+
+
+initial
+ begin
+    #5 a=4'h0;b=4'h0;cin=1'b0;
+    #1 $display("%b %b %b :%b %b ",a,b,cin,sum,cout);  
+    repeat(5)
+   begin
+    #5 a=$random;b=$random;cin=1'b0;
+    #1 $display("%b %b %b :%b %b ",a,b,cin,sum,cout);
+
+   end
+   #5 a=4'hf;b=4'hf;cin=1'b0;
+   #1 $display("%b %b %b :%b %b ",a,b,cin,sum,cout);
+  #10 $finish;
+ end
+endmodule
+
 
