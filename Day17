@@ -1,0 +1,113 @@
+// 4 Bit CarryLook Ahead addercode
+module CLA(a, b, carryIn, carryOut,sum);
+	input [3:0] a, b ;
+	input  carryIn;
+	output [3:0] sum;
+	
+	
+	// output PG;
+	// output GG;
+	
+	output carryOut;
+	
+	wire[3:0]p ,g ,c;
+	
+  assign p=a^b;
+  assign g=a&b;
+
+
+assign c[0]=carryIn;
+assign c[1]= g[0]|(p[0]&c[0]);
+assign c[2]= g[1] | (p[1]&g[0]) | p[1]&p[0]&c[0];
+assign c[3]= g[2] | (p[2]&g[1]) | p[2]&p[1]&g[0] | p[2]&p[1]&p[0]&c[0];
+assign carryOut= g[3] | (p[3]&g[2]) | p[3]&p[2]&g[1] | p[3]&p[2]&p[1]&g[0] | p[3]&p[2]&p[1]&p[0]&c[0];
+assign sum=p^c;
+	
+endmodule
+module CSA_TB();
+
+reg [15:0] data1,data2;
+reg carryin;
+wire [15:0]sum;
+wire carryout;
+
+CSA_16bit DUT(data1, data2, carryin, sum, carryout);
+
+initial 
+begin
+    #5 data1=16'h0;data2=16'h0;carryin=1'b0;
+	#1 $display("%b %b %b:%b %b :%d",data1,data2,carryin,carryout,sum,{carryout,sum});
+repeat(5)
+  begin 
+    #5 data1=$random;data2=$random;carryin=$random;
+	#1 $display("%b %b %b:%b %b :%d",data1,data2,carryin,carryout,sum,{carryout,sum});
+   end
+    #5 data1=16'hffff;data2=16'hffff;carryin=0;
+	#1 $display("%b %b %b:%b %b :%d",data1,data2,carryin,carryout,sum,{carryout,sum});
+   
+   #10 $finish;
+  end
+endmodule
+// carry skip adder of 16 bit using Carry Look Ahead Adder
+module CSA_16bit(input [15:0] Data1,
+                 input [15:0] Data2,
+                 input carryIn,
+				 output reg [15:0] sum,
+				 output reg carryOut);
+				 
+	reg carryIn_0=1'b0;
+	reg carryIn_1=1'b1;
+	reg carryOut2,carryOut3;
+	wire carryOut1,carryOut2_0,carryOut2_1,carryOut3_0,carryOut3_1,carryOut4_0,carryOut4_1;
+	wire [15:4]sum_0,sum_1;
+	wire [3:0]sum0;
+    	
+
+	CLA  A1(Data1[3:0], Data2[3:0], carryIn, carryOut1,sum0[3:0]);
+	CLA  A2(Data1[7:4], Data2[7:4], carryIn_0, carryOut2_0,sum_0 [7:4]);
+	CLA  A3(Data1[7:4], Data2[7:4], carryIn_1, carryOut2_1,sum_1 [7:4]);
+	CLA  A4(Data1[11:8], Data2[11:8], carryIn_0, carryOut3_0,sum_0 [11:8]);
+	CLA  A5(Data1[11:8], Data2[11:8], carryIn_1, carryOut3_1,sum_1 [11:8]);
+	CLA  A6(Data1[15:12], Data2[15:12], carryIn_0, carryOut4_0,sum_0 [15:12]);
+	CLA  A7(Data1[15:12], Data2[15:12], carryIn_1, carryOut4_1,sum_1 [15:12]);
+	
+	
+	always @(*)
+	 begin
+	   sum[3:0] =sum0 [3:0];
+	   if(carryOut1)
+	      begin
+		    sum[7:4] = sum_1[7:4];
+            carryOut2 = carryOut2_1;
+            end
+        else
+          begin		
+		    sum[7:4] = sum_0[7:4];
+            carryOut2 = carryOut2_0;
+            end
+
+        if(carryOut2)
+ 	      begin
+		    sum[11:8] = sum_1[11:8];
+            carryOut3 = carryOut3_1;
+            end
+        else
+          begin		
+		    sum[11:8] = sum_0[11:8];
+            carryOut3 = carryOut3_0;
+            end           		
+				 
+           if(carryOut3)
+ 	      begin
+		    sum[15:12] = sum_1[15:12];
+            carryOut = carryOut4_1;
+            end
+        else
+          begin		
+		    sum[15:12] = sum_0[15:12];
+            carryOut = carryOut4_0;
+            end               
+			
+	end
+	
+endmodule
