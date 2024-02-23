@@ -1,0 +1,31 @@
+// D flip flop With Asynchronous Reset
+module D_ff(input D,rst,clk,enable,
+          output reg q,
+		  output qbar);
+		  
+always @(posedge clk or negedge rst) 
+ begin
+   if(!rst)
+       q=1'b0;
+	else if(enable) 
+	  q<=D;
+	else
+	  q<=q;
+ end
+ 
+    assign qbar=~q;
+endmodule 
+	  
+// JK flipflop using D flipflop
+module JK_using_D(input J,K,rst,clk,
+          output  q,
+		  output qbar);
+	
+    wire D,t1,t2;
+
+     assign t1=J&qbar;
+     assign t2=(~K)&q;
+     assign D=t1|t2;	 
+	D_ff D_ff(D,rst,clk,1'b1,q,qbar);
+	
+endmodule
