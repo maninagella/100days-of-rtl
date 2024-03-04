@@ -1,0 +1,37 @@
+`timescale 1ns / 1ps
+
+module SIPO(
+input din,clk,clr,
+output reg [3:0] q
+    );
+    reg [3:0] temp;
+    always@(posedge clk)
+    if(clr==1'b1)
+    q<=4'b0000;
+    else begin
+    temp=q>>1;
+    q={din,temp[2:0]};
+    end
+  
+endmodule
+`timescale 1ns / 1ps
+
+module sipo_tb;
+reg  din,clk,clr;
+wire [3:0] q;
+
+SIPO dut(din,clk,clr,q);
+
+initial begin
+   clk=0;
+    clr = 1;
+    din=0;
+    #10 clr = 0;
+    
+end
+   
+   always #1 clk=~clk;
+   always #2 din=~din;
+   initial #50 $stop;
+  
+endmodule
